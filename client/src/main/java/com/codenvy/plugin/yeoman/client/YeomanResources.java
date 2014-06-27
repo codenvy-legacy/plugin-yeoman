@@ -13,6 +13,8 @@ package com.codenvy.plugin.yeoman.client;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
+import org.vectomatic.dom.svg.ui.SVGResource;
+
 /**
  * @author Florent Benoit
  */
@@ -20,6 +22,11 @@ public interface YeomanResources extends ClientBundle {
 
     @ClientBundle.Source({"com/codenvy/plugin/yeoman/client/ui.css", "com/codenvy/ide/api/ui/style.css"})
     UiStyle uiCss();
+
+
+    @Source("com/codenvy/plugin/yeoman/client/svg/trash.svg")
+    SVGResource trashIcon();
+
 
     public interface UiStyle extends CssResource {
 

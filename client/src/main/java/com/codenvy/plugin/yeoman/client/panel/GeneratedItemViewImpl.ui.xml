@@ -16,7 +16,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:svgui='urn:import:org.vectomatic.dom.svg.ui'>
 
-    <ui:with field="uiResources" type="com.codenvy.plugin.angularjs.core.client.editor.AngularJSResources"/>
+    <ui:with field="uiResources" type="com.codenvy.plugin.yeoman.client.YeomanResources"/>
 
     <ui:style>
         .item-name {

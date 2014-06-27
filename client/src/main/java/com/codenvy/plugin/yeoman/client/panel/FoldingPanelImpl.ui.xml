@@ -14,7 +14,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <ui:style type="com.codenvy.plugin.angularjs.core.client.menu.yeoman.FoldingPanelImpl.FoldingCss">
+    <ui:style type="com.codenvy.plugin.yeoman.client.panel.FoldingPanelImpl.FoldingCss">
         .mainPanel-layout {
             display: flex;
             display: -webkit-flex;
