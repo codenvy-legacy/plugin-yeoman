@@ -43,8 +43,8 @@
         <module>client</module>
       </modules>
     <scm>
-        <connection>scm:git:git@github.com:codenvy/plugin-bower.git</connection>
-        <developerConnection>scm:git:git@github.com:codenvy/plugin-bower.git</developerConnection>
+        <connection>scm:git:git@github.com:codenvy/plugin-yeoman.git</connection>
+        <developerConnection>scm:git:git@github.com:codenvy/plugin-yeoman.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <properties>
