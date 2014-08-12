@@ -12,17 +12,13 @@ package com.codenvy.plugin.yeoman.client.panel;
 
 import com.codenvy.api.builder.BuildStatus;
 import com.codenvy.api.builder.dto.BuildOptions;
-import com.codenvy.ide.api.editor.TextEditorPartPresenter;
-import com.codenvy.ide.api.event.ActivePartChangedEvent;
-import com.codenvy.ide.api.event.ActivePartChangedHandler;
+import com.codenvy.ide.api.app.AppContext;
+import com.codenvy.ide.api.event.RefreshProjectTreeEvent;
 import com.codenvy.ide.api.parts.base.BasePresenter;
-import com.codenvy.ide.api.resources.ResourceProvider;
-import com.codenvy.ide.api.resources.model.Project;
 import com.codenvy.ide.dto.DtoFactory;
 import com.codenvy.plugin.yeoman.client.builder.BuildFinishedCallback;
 import com.codenvy.plugin.yeoman.client.builder.BuilderAgent;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -60,17 +56,17 @@ public class YeomanPartPresenter extends BasePresenter implements YeomanPartView
      */
     private Map<YeomanGeneratorType, FoldingPanel> widgetByTypes;
 
-    private ResourceProvider resourceProvider;
+    private EventBus eventBus;
 
     private DtoFactory   dtoFactory;
     private BuilderAgent builderAgent;
 
     @Inject
     public YeomanPartPresenter(YeomanPartView view, EventBus eventBus, FoldingPanelFactory foldingPanelFactory,
-                               GeneratedItemViewFactory generatedItemViewFactory, ResourceProvider resourceProvider, DtoFactory dtoFactory,
+                               GeneratedItemViewFactory generatedItemViewFactory, AppContext appContext, DtoFactory dtoFactory,
                                BuilderAgent builderAgent) {
         this.view = view;
-        this.resourceProvider = resourceProvider;
+        this.eventBus = eventBus;
         this.foldingPanelFactory = foldingPanelFactory;
         this.generatedItemViewFactory = generatedItemViewFactory;
         this.dtoFactory = dtoFactory;
@@ -162,21 +158,12 @@ public class YeomanPartPresenter extends BasePresenter implements YeomanPartView
     public void onFinished(BuildStatus buildStatus) {
         // refresh the tree if it is successful
         if (buildStatus == BuildStatus.SUCCESSFUL) {
-            resourceProvider.getActiveProject().refreshChildren(new AsyncCallback<Project>() {
-                @Override
-                public void onSuccess(Project result) {
-                    // remove what has been generated
-                    namesByTypes.clear();
-                    widgetByTypes.clear();
-                    view.clear();
-                    updateGenerateButton();
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    updateGenerateButton();
-                }
-            });
+            eventBus.fireEvent(new RefreshProjectTreeEvent());
+            // remove what has been generated
+            namesByTypes.clear();
+            widgetByTypes.clear();
+            view.clear();
+            updateGenerateButton();
         }
 
     }

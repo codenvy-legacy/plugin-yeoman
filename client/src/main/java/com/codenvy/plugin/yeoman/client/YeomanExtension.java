@@ -10,12 +10,12 @@
  *******************************************************************************/
 package com.codenvy.plugin.yeoman.client;
 
+import com.codenvy.api.project.shared.dto.ProjectDescriptor;
 import com.codenvy.ide.api.event.ProjectActionEvent;
 import com.codenvy.ide.api.event.ProjectActionHandler;
 import com.codenvy.ide.api.extension.Extension;
-import com.codenvy.ide.api.resources.model.Project;
-import com.codenvy.ide.api.ui.workspace.PartStackType;
-import com.codenvy.ide.api.ui.workspace.WorkspaceAgent;
+import com.codenvy.ide.api.parts.PartStackType;
+import com.codenvy.ide.api.parts.WorkspaceAgent;
 import com.codenvy.plugin.yeoman.client.panel.YeomanPartPresenter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,8 +43,8 @@ public class YeomanExtension {
             @Override
             public void onProjectOpened(ProjectActionEvent event) {
 
-                Project project = event.getProject();
-                final String projectTypeId = project.getDescription().getProjectTypeId();
+                ProjectDescriptor project = event.getProject();
+                final String projectTypeId = project.getProjectTypeId();
                 boolean isAngularJSProject = "AngularJS".equals(projectTypeId);
                 if (isAngularJSProject) {
                     // add Yeoman panel
@@ -59,20 +59,15 @@ public class YeomanExtension {
              */
             @Override
             public void onProjectClosed(ProjectActionEvent event) {
-                Project project = event.getProject();
-                final String projectTypeId = project.getDescription().getProjectTypeId();
+                ProjectDescriptor project = event.getProject();
+                final String projectTypeId = project.getProjectTypeId();
                 boolean isAngularJSProject = "AngularJS".equals(projectTypeId);
                 if (isAngularJSProject) {
                     workspaceAgent.removePart(yeomanPartPresenter);
                 }
 
             }
-
-            @Override
-            public void onProjectDescriptionChanged(ProjectActionEvent event) {
-            }
         });
-
 
     }
 }
