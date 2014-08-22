@@ -12,12 +12,12 @@ package com.codenvy.plugin.yeoman.client.panel;
 
 import com.codenvy.api.builder.BuildStatus;
 import com.codenvy.api.builder.dto.BuildOptions;
-import com.codenvy.ide.api.resources.ResourceProvider;
-import com.codenvy.ide.api.resources.model.Project;
+import com.codenvy.ide.api.app.AppContext;
+import com.codenvy.ide.api.app.CurrentProject;
+import com.codenvy.ide.api.event.RefreshProjectTreeEvent;
 import com.codenvy.ide.dto.DtoFactory;
 import com.codenvy.plugin.yeoman.client.builder.BuilderAgent;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.junit.Before;
@@ -67,9 +67,8 @@ public class YeomanPartPresenterTest {
     @Mock
     GeneratedItemViewFactory generatedItemViewFactory;
 
-
     @Mock
-    ResourceProvider resourceProvider;
+    AppContext appContext;
 
     @Mock
     DtoFactory dtoFactory;
@@ -103,7 +102,7 @@ public class YeomanPartPresenterTest {
     private GeneratedItemView itemRoute1;
 
     @Mock
-    private Project activeProject;
+    private CurrentProject activeProject;
 
     @Captor
     ArgumentCaptor<BuildOptions> buildOptionsArgumentCaptor;
@@ -111,14 +110,11 @@ public class YeomanPartPresenterTest {
     @Captor
     ArgumentCaptor<List<String>> listArgumentCaptor;
 
-    @Captor
-    ArgumentCaptor<AsyncCallback> asyncCallbackCaptor;
-
 
     @Before
     public void setUp() {
         this.presenter = new YeomanPartPresenter(yeomanPartView, eventBus, foldingPanelFactory,
-                                                 generatedItemViewFactory, resourceProvider, dtoFactory, builderAgent);
+                                                 generatedItemViewFactory, appContext, dtoFactory, builderAgent);
 
         // Mock folding panel factory
         doReturn(foldingPanelController).when(foldingPanelFactory).create(CONTROLLER.getLabelName());
@@ -138,7 +134,7 @@ public class YeomanPartPresenterTest {
         doReturn(buildOptions).when(buildOptions).withBuilderName(anyString());
 
         // Mocking resource provider
-        doReturn(activeProject).when(resourceProvider).getActiveProject();
+        doReturn(activeProject).when(appContext).getCurrentProject();
 
 
     }
@@ -489,25 +485,18 @@ public class YeomanPartPresenterTest {
      */
     @Test
     public void checkFinishedCallbackSuccess() {
-        presenter.onFinished(BuildStatus.SUCCESSFUL);
-
-        verify(activeProject).refreshChildren(asyncCallbackCaptor.capture());
-
-        AsyncCallback<Project> callback = asyncCallbackCaptor.getValue();
-        assertNotNull(callback);
-
         // add items
         presenter.addItem(CONTROLLER1, CONTROLLER);
         presenter.addItem(CONTROLLER2, CONTROLLER);
         presenter.addItem(ROUTE1, ROUTE);
 
-
         // item is in the list
         assertEquals(2, presenter.getWidgetByTypes().size());
         assertEquals(2, presenter.getNamesByTypes().size());
 
-        // check success callback
-        callback.onSuccess(activeProject);
+        presenter.onFinished(BuildStatus.SUCCESSFUL);
+
+        verify(eventBus).fireEvent(any(RefreshProjectTreeEvent.class));
 
         // check that all has been removed
         assertEquals(0, presenter.getWidgetByTypes().size());
@@ -516,36 +505,4 @@ public class YeomanPartPresenterTest {
 
     }
 
-
-    /**
-     * Check when there is failure on the finish callback
-     */
-    @Test
-    public void checkFinishedCallbackFailure() {
-        presenter.onFinished(BuildStatus.SUCCESSFUL);
-
-        verify(activeProject).refreshChildren(asyncCallbackCaptor.capture());
-
-        AsyncCallback<Project> callback = asyncCallbackCaptor.getValue();
-        assertNotNull(callback);
-
-        // add items
-        presenter.addItem(CONTROLLER1, CONTROLLER);
-        presenter.addItem(CONTROLLER2, CONTROLLER);
-        presenter.addItem(ROUTE1, ROUTE);
-
-
-        // item is in the list
-        assertEquals(2, presenter.getWidgetByTypes().size());
-        assertEquals(2, presenter.getNamesByTypes().size());
-
-        // check failure callback
-        callback.onFailure(new Exception());
-
-        // check that nothing has been removed
-        assertEquals(2, presenter.getWidgetByTypes().size());
-        assertEquals(2, presenter.getNamesByTypes().size());
-        verify(yeomanPartView, times(0)).clear();
-
-    }
 }
