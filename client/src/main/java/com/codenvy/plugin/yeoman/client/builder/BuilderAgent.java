@@ -157,8 +157,8 @@ public class BuilderAgent {
      * @param buildFinishedCallback
      */
     protected void startChecking(final Notification notification, final BuildTaskDescriptor buildTaskDescriptor,
-                                     final String successMessage, final String errorMessage, final String prefixConsole,
-                                     final BuildFinishedCallback buildFinishedCallback) {
+                                 final String successMessage, final String errorMessage, final String prefixConsole,
+                                 final BuildFinishedCallback buildFinishedCallback) {
 
         final SubscriptionHandler<String>  buildOutputHandler = new SubscriptionHandler<String>(new LineUnmarshaller()) {
             @Override
@@ -224,8 +224,8 @@ public class BuilderAgent {
      *         status of build
      */
     protected void updateBuildStatus(Notification notification, BuildTaskDescriptor descriptor,
-                                   SubscriptionHandler<String> buildStatusHandler, SubscriptionHandler<String> buildOutputHandler, final String successMessage, final String errorMessage, final String prefixConsole,
-                                   final BuildFinishedCallback buildFinishedCallback) {
+                                     SubscriptionHandler<String> buildStatusHandler, SubscriptionHandler<String> buildOutputHandler, final String successMessage, final String errorMessage, final String prefixConsole,
+                                     final BuildFinishedCallback buildFinishedCallback) {
         BuildStatus status = descriptor.getStatus();
         if (status == BuildStatus.IN_PROGRESS || status == BuildStatus.IN_QUEUE) {
             return;
@@ -242,8 +242,8 @@ public class BuilderAgent {
      *         status of build job
      */
     protected void afterBuildFinished(Notification notification, BuildTaskDescriptor descriptor,
-                                    SubscriptionHandler<String> buildStatusHandler, SubscriptionHandler<String> buildOutputHandler, final String successMessage, final String errorMessage, final String prefixConsole,
-                                    BuildFinishedCallback buildFinishedCallback) {
+                                      SubscriptionHandler<String> buildStatusHandler, SubscriptionHandler<String> buildOutputHandler, final String successMessage, final String errorMessage, final String prefixConsole,
+                                      BuildFinishedCallback buildFinishedCallback) {
         try {
             messageBus.unsubscribe(BuilderExtension.BUILD_STATUS_CHANNEL + descriptor.getTaskId(), buildStatusHandler);
         } catch (Exception e) {
@@ -267,7 +267,7 @@ public class BuilderAgent {
         }
 
         // import zip
-        importZipResult(descriptor, buildFinishedCallback);
+        importZipResult(descriptor, buildFinishedCallback, notification, errorMessage);
 
 
     }
@@ -277,7 +277,7 @@ public class BuilderAgent {
      * @param descriptor the build descriptor
      * @param buildFinishedCallback the callback to call
      */
-    protected void importZipResult(final BuildTaskDescriptor descriptor, final BuildFinishedCallback buildFinishedCallback) {
+    protected void importZipResult(final BuildTaskDescriptor descriptor, final BuildFinishedCallback buildFinishedCallback, final Notification notification, final String errorMessage) {
         Link downloadLink = null;
         List<Link> links = descriptor.getLinks();
         for (Link link : links) {
@@ -291,7 +291,7 @@ public class BuilderAgent {
             ImportSourceDescriptor importSourceDescriptor =
                     dtoFactory.createDto(ImportSourceDescriptor.class).withLocation(downloadLink.getHref()).withType("zip");
 
-            projectServiceClient.importProject(appContext.getCurrentProject().getProjectDescription().getPath(), true, importSourceDescriptor, new AsyncRequestCallback<ProjectDescriptor>() {
+            projectServiceClient.importProject(appContext.getCurrentProject().getProjectDescription().getPath(), true,  importSourceDescriptor, new AsyncRequestCallback<ProjectDescriptor>() {
                 @Override
                 protected void onSuccess(ProjectDescriptor projectDescriptor) {
                     // notify callback
@@ -302,6 +302,9 @@ public class BuilderAgent {
 
                 @Override
                 protected void onFailure(Throwable throwable) {
+                    notification.setMessage(errorMessage + ":" + throwable.getMessage());
+                    notification.setStatus(FINISHED);
+                    notification.setType(ERROR);
                     if (buildFinishedCallback != null) {
                         buildFinishedCallback.onFinished(descriptor.getStatus());
                     }
