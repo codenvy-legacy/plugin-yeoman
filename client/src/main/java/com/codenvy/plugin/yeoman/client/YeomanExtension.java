@@ -45,8 +45,8 @@ public class YeomanExtension {
 
                 ProjectDescriptor project = event.getProject();
                 final String projectTypeId = project.getProjectTypeId();
-                boolean isAngularJSProject = "AngularJS".equals(projectTypeId);
-                if (isAngularJSProject) {
+                boolean isJSProject = projectTypeId.endsWith("JS");
+                if (isJSProject) {
                     // add Yeoman panel
                     workspaceAgent.openPart(yeomanPartPresenter, PartStackType.TOOLING);
                     workspaceAgent.hidePart(yeomanPartPresenter);
@@ -61,8 +61,8 @@ public class YeomanExtension {
             public void onProjectClosed(ProjectActionEvent event) {
                 ProjectDescriptor project = event.getProject();
                 final String projectTypeId = project.getProjectTypeId();
-                boolean isAngularJSProject = "AngularJS".equals(projectTypeId);
-                if (isAngularJSProject) {
+                boolean isJSProject = projectTypeId.endsWith("JS");
+                if (isJSProject) {
                     workspaceAgent.removePart(yeomanPartPresenter);
                 }
 
