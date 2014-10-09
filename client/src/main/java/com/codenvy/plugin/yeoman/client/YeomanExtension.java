@@ -44,7 +44,7 @@ public class YeomanExtension {
             public void onProjectOpened(ProjectActionEvent event) {
 
                 ProjectDescriptor project = event.getProject();
-                final String projectTypeId = project.getProjectTypeId();
+                final String projectTypeId = project.getType();
                 boolean isJSProject = projectTypeId.endsWith("JS");
                 if (isJSProject) {
                     // add Yeoman panel
@@ -60,7 +60,7 @@ public class YeomanExtension {
             @Override
             public void onProjectClosed(ProjectActionEvent event) {
                 ProjectDescriptor project = event.getProject();
-                final String projectTypeId = project.getProjectTypeId();
+                final String projectTypeId = project.getType();
                 boolean isJSProject = projectTypeId.endsWith("JS");
                 if (isJSProject) {
                     workspaceAgent.removePart(yeomanPartPresenter);
