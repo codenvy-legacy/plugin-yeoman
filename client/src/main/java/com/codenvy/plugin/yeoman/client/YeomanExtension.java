@@ -26,7 +26,7 @@ import com.google.web.bindery.event.shared.EventBus;
  * @author Florent Benoit
  */
 @Singleton
-@Extension(title = "Yeoman extension")
+@Extension(title = "Yeoman")
 public class YeomanExtension {
 
 
