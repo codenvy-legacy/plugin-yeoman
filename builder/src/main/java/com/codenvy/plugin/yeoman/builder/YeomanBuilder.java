@@ -19,7 +19,6 @@ import com.codenvy.api.builder.internal.BuilderConfiguration;
 import com.codenvy.api.builder.internal.Constants;
 import com.codenvy.api.core.notification.EventService;
 import com.codenvy.api.core.util.CommandLine;
-import com.codenvy.commons.lang.ZipUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,7 +168,6 @@ public class YeomanBuilder extends Builder implements BuildListener {
         return new BuildResult(true, artifacts);
     }
 
-
     /**
      * Build the zip file of yeoman generated stuff
      *
@@ -180,15 +180,31 @@ public class YeomanBuilder extends Builder implements BuildListener {
         // get working directory
         File workingDirectory = builderConfiguration.getWorkDir();
 
-        // build zip containing all the source code
-        File zipFile = new File(workingDirectory, "content.zip");
+        // collect all files generated after the current timestamp of the working directory
+        BasicFileAttributes basicFileAttributes;
         try {
-            ZipUtils.zipDir(workingDirectory.getPath(), workingDirectory, zipFile, null);
+             basicFileAttributes = Files.readAttributes(workingDirectory.toPath(), BasicFileAttributes.class);
         } catch (IOException e) {
             throw new BuilderException("Unable to create archive of the current workspace", e);
         }
+        long timeBeforeGeneration = basicFileAttributes.creationTime().toMillis();
 
-        return zipFile;
+        // build zip containing all the source code in parent folder
+        File zipFile = new File(workingDirectory.getParentFile(), "yeoman-content.zip");
+        try {
+            ZipHelper.zip(zipFile.toPath(), workingDirectory.toPath(), timeBeforeGeneration);
+        } catch (IOException e) {
+            throw new BuilderException("Unable to create archive of the current workspace", e);
+        }
+        File returnFile = new File(workingDirectory, zipFile.getName());
+        // move it to the workdir path (in order that link is not with ../)
+        try {
+            Files.move(zipFile.toPath(), returnFile.toPath());
+        } catch (IOException e) {
+            throw new BuilderException("Unable to move archive of the current workspace", e);
+        }
+
+        return returnFile;
     }
 
     @Override
