@@ -14,7 +14,6 @@ import com.codenvy.ide.api.parts.PartStackUIResources;
 import com.codenvy.ide.api.parts.base.BaseView;
 import com.codenvy.ide.notification.NotificationResources;
 import com.codenvy.plugin.yeoman.client.YeomanResources;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -34,7 +33,9 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class YeomanPartViewImpl extends BaseView<YeomanPartView.ActionDelegate> implements YeomanPartView {
 
-    private static YeomanPartViewImplUiBinder uiBinder = GWT.create(YeomanPartViewImplUiBinder.class);
+    interface YeomanPartViewImplUiBinder extends UiBinder<Widget, YeomanPartViewImpl> {
+    }
+
     /**
      * CSS resource.
      */
@@ -65,14 +66,16 @@ public class YeomanPartViewImpl extends BaseView<YeomanPartView.ActionDelegate> 
     private SVGImage progressIcon;
 
     @Inject
-    public YeomanPartViewImpl(YeomanResources yeomanResources, PartStackUIResources resources,
-                              NotificationResources notificationResources) {
+    public YeomanPartViewImpl(YeomanResources yeomanResources,
+                              PartStackUIResources resources,
+                              NotificationResources notificationResources,
+                              YeomanPartViewImplUiBinder uiBinder) {
         super(resources);
         this.uiResources = yeomanResources;
         this.notificationResources = notificationResources;
 
         container = new SimplePanel();
-        super.container.add(container);
+        setContentWidget(container);
         container.add(uiBinder.createAndBindUi(this));
 
         // add types
@@ -165,10 +168,6 @@ public class YeomanPartViewImpl extends BaseView<YeomanPartView.ActionDelegate> 
     @Override
     public void enableProgressOnGenerateButton() {
         iconField.setWidget(progressIcon);
-    }
-
-
-    interface YeomanPartViewImplUiBinder extends UiBinder<Widget, YeomanPartViewImpl> {
     }
 
 }
